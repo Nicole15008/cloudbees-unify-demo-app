@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: workflow
+name: Enterprise DevSecOps Evaluation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security-orchestration:
+    steps:
+      - name: Checkout Codebase
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run Vulnerability Scan
+        uses: cloudbees-io/snyk-scan@v1
+        with:
+          severity-threshold: high
+          output-format: sarif
+
+      - name: Enforce Policy Gate
+        uses: cloudbees-io/policy-engine@v1
+        with:
+          policy-path: .cloudbees/policies/security-gate.rego
