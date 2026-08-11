@@ -1,16 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: finsure-bank-regulated-release
-
-# Regulated release orchestration for FinSure Bank — a STAGED workflow.
-# Deploy stages map to environments and call the reusable deployer, which
-# simulates deploying each component. Governance/validation/approval/evidence
-# jobs run mock steps and publish evidence to the run's Evidence tab.
-#
-# Setup in CloudBees Unify: the target environments (staging, prod) must exist
-# and be associated with the application, and the component must be part of the
-# application. Deploys are simulated (no real cluster).
-
 on:
   workflow_dispatch:
     inputs:
@@ -23,7 +13,6 @@ on:
       release_window:
         type: string
         default: Saturday 22:00-23:00 ET
-
 metadata:
   stages/v1alpha1:
     - name: Governance
@@ -42,7 +31,6 @@ metadata:
     - name: Post-Release
       jobs:
         - release-evidence
-
 jobs:
   governance-review:
     steps:
@@ -64,7 +52,6 @@ jobs:
             - Release window: ${{ inputs.release_window }}
             - Unit tests / security scans / approvals: verified
             - Audit evidence: **complete**
-
   deploy-staging:
     needs:
       - governance-review
@@ -73,7 +60,6 @@ jobs:
     with:
       manifest: ${{ inputs.manifest }}
       environment: ${{ job.environment }}
-
   staging-validation:
     needs:
       - deploy-staging
@@ -95,7 +81,6 @@ jobs:
             - SLO dashboards: within thresholds
             - Audit controls: validated
             - Status: **passed**
-
   production-approval:
     needs:
       - staging-validation
@@ -115,7 +100,6 @@ jobs:
             - Approvers: Release Manager, Security, Application Owner
             - Change ticket: ${{ inputs.change_ticket }}
             - Decision: **approved** (simulated for demo)
-
   deploy-production:
     needs:
       - production-approval
@@ -124,7 +108,6 @@ jobs:
     with:
       manifest: ${{ inputs.manifest }}
       environment: ${{ job.environment }}
-
   release-evidence:
     needs:
       - deploy-production
